@@ -1,0 +1,26 @@
+/**
+ * A 16-bit counter.
+ * if      reset(t): out(t+1) = 0
+ * else if load(t):  out(t+1) = in(t)
+ * else if inc(t):   out(t+1) = out(t) + 1
+ * else              out(t+1) = out(t)
+ */
+CHIP PC {
+    IN in[16], reset, load, inc;
+    OUT out[16];
+    
+    PARTS:
+    RAM8(in=rin,load=true,out=rout);
+    //生成16位0掩码
+    Mux16(a=true,b=false,sel=reset,out=resetFactor);
+    //计算自增值
+    Inc16(in=rout,out=incResult);
+    //选择是否自增
+    Mux16(a=rout,b=incResult,sel=inc,out=result1);
+    //load==1则自增选择结果被in覆盖
+    Mux16(a=result1,b=in,sel=load,out=result2);
+    //reset==1则最终结果被0覆盖
+    And16(a=result2,b=resetFactor,out=rin);
+    //连接RAM和输出
+    Or16(a=false,b=rout,out=out);
+}

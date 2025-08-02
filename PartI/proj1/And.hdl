@@ -1,0 +1,12 @@
+/**
+*与门，使用与非门实现
+*out=a与b
+*/
+CHIP And {
+    IN a, b;
+    OUT out;
+    
+    PARTS:
+    Nand(a=a,b=b,out=notaAndb);
+    Nand(a=notaAndb,b=notaAndb,out=out);
+}

@@ -1,0 +1,11 @@
+/**
+*非门，使用与非门实现:
+*对输入in取反作为输出out
+*/
+CHIP Not{
+	IN in;
+	OUT out;
+
+	PARTS:
+	Nand(a=in,b=in,out=out);
+}

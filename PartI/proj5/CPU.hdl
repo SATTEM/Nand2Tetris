@@ -1,0 +1,79 @@
+/**
+ * The Hack Central Processing unit (CPU).
+ * Parses the binary code in the instruction input and executes it according to the
+ * Hack machine language specification. In the case of a C-instruction, computes the
+ * function specified by the instruction. If the instruction specifies to read a memory
+ * value, the inM input is expected to contain this value. If the instruction specifies
+ * to write a value to the memory, sets the outM output to this value, sets the addressM
+ * output to the target address, and asserts the writeM output (when writeM = 0, any
+ * value may appear in outM).
+ * If the reset input is 0, computes the address of the next instruction and sets the
+ * pc output to that value. If the reset input is 1, sets pc to 0.
+ * Note: The outM and writeM outputs are combinational: they are affected by the
+ * instruction's execution during the current cycle. The addressM and pc outputs are
+ * clocked: although they are affected by the instruction's execution, they commit to
+ * their new values only in the next cycle.
+ */
+CHIP CPU {
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset==1) or continue executing
+                         // the current program (reset==0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write to M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+    PARTS:
+    Not(in=instruction[15],out=isACMD);    
+    /**第一位为操作码
+    *A指令(0)则A寄存器输入来自指令
+    *C指令(1)则A寄存器输入来自ALU的输出
+    */
+    Mux16(a=ALUOut, b=instruction, sel=isACMD, out=aRegIn);
+    //如果为A指令，或为改变A寄存器的C指令，则A寄存器load
+    //这里A+(!A)B=A+B
+    Or(a=instruction[5],b=isACMD,out=isLoadA);
+    //addressM与A寄存器同步
+    Register(in=aRegIn, load=isLoadA, out=aRegOut,out[0..14]=addressM);
+    //判断ALU输入是A还是M:若为C指令且instruction[12]为1则为M，否则为A
+    And(a=instruction[15],b=instruction[12],out=isALUinputM);
+    Mux16(a=aRegOut,b=inM,sel=isALUinputM,out=ALUin);
+    //若为改变D寄存器的C指令则D寄存器加载ALU的输出
+    And(a=instruction[15],b=instruction[4],out=isLoadD);
+    DRegister(in=ALUOut, load=isLoadD, out=dRegOut);
+    //对A指令，输出为A，即110000
+    //对C指令，c1~c6对应各参数
+    Mux(b=true,a=instruction[11],sel=isACMD,out=zx);
+    Mux(b=true,a=instruction[10],sel=isACMD,out=nx);
+    Mux(b=false,a=instruction[9],sel=isACMD,out=zy);
+    Mux(b=false,a=instruction[8],sel=isACMD,out=ny);
+    Mux(b=false,a=instruction[7],sel=isACMD,out=f);
+    Mux(b=false,a=instruction[6],sel=isACMD,out=no);
+    //ALU计算
+    ALU(x=dRegOut, y=ALUin, zx=zx, nx=nx, zy=zy, ny=ny, f=f, no=no, out=ALUOut,out=outM, zr= ALUzr, ng=ALUng);
+    //若为C指令且需改变M，则设置writeM为真
+    And(a=instruction[15],b=instruction[3],out=writeM);
+    //处理跳跃：
+    //对于C指令，j1控制小于，j2控制等于，j3控制大于，三者为或的关系
+    //对于A指令，情况同000一样，pc+1，则可以先对j1j2j3进行处理
+    And(a=instruction[15],b=instruction[2],out=j1);
+    And(a=instruction[15],b=instruction[1],out=j2);
+    And(a=instruction[15],b=instruction[0],out=j3);
+    //输出小于0且j1为1，则跳转
+    And(a=j1,b=ALUng,out=jp1);
+    //输出等于0且j2为1，则跳转
+    And(a=j2,b=ALUzr,out=jp2);
+    //输出大于0且j3为1，则跳转
+    Or(a=ALUzr,b=ALUng,out=ALUle);
+    Not(in=ALUle,out=ALUgt);
+    And(a=j3,b=ALUgt,out=jp3);
+    //若以上任一个条件成立，则跳转
+    Or(a=jp1,b=jp2,out=jpTMP);
+    Or(a=jpTMP,b=jp3,out=jp);
+    //若不跳转pc自增
+    Not(in=jp,out=notjp);
+    PC(in=aRegOut, load=jp, inc=notjp, reset=reset, out[0..14]=pc);
+}

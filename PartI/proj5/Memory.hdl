@@ -1,0 +1,48 @@
+/**
+ * The complete address space of the Hack computer's memory,
+ * including RAM and memory-mapped I/O. 
+ * The chip facilitates read and write operations, as follows:
+ *     Read:  out(t) = Memory[address(t)](t)
+ *     Write: if load(t-1) then Memory[address(t-1)](t) = in(t-1)
+ * In words: the chip always outputs the value stored at the memory 
+ * location specified by address. If load=1, the in value is loaded 
+ * into the memory location specified by address. This value becomes 
+ * available through the out output from the next time step onward.
+ * Address space rules:
+ * Only the upper 16K+8K+1 words of the Memory chip are used. 
+ * Access to address>0x6000 is invalid and reads 0. Access to any address
+ * in the range 0x4000-0x5FFF results in accessing the screen memory 
+ * map. Access to address 0x6000 results in accessing the keyboard 
+ * memory map. The behavior in these addresses is described in the Screen
+ * and Keyboard chip specifications given in the lectures and the book.
+ */
+CHIP Memory {
+    IN in[16], load, address[15];
+    OUT out[16];
+
+    PARTS:
+    /*判断逻辑分区:起点[长度]
+    *由地址前两位进行分片
+    *0[2^14]:普通RAM:0~011111111111111
+    *2^14[2^13]:screen:1000000000000~101111111111111
+    24576[1]:键盘:110000000000000*/
+    Not(in=address[14],out=notFir);
+    Not(in=address[13],out=notSec);
+    //第15位为0则在RAM内，load针对的也是RAM
+    And(a=true,b=notFir,out=isRAM);
+    And(a=isRAM,b=load,out=loadRAM);
+    //第15位为1，第14位为0则在SCREEN内
+    And(a=address[14],b=notSec,out=isScreen);
+    And(a=isScreen,b=load,out=loadScreen);
+    //第15位为1，第14位为1则访问键盘
+    And(a=address[14],b=address[13],out=isKey);
+    //RAM芯片
+	RAM16K(in=in, load=loadRAM, address=address[0..13], out=RAMOut);
+    //屏幕
+    Screen(in=in, load=loadScreen, address=address[0..12], out=ScreenOut);
+    //键盘
+    Keyboard(out=KeyOut);
+    //由分片信号决定输出:
+    //00&01:RAM 10:Screen 11:键盘
+    Mux4Way16(a=RAMOut, b=RAMOut, c=ScreenOut, d=KeyOut, sel=address[13..14], out=out);
+}

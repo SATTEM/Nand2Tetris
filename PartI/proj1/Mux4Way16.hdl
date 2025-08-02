@@ -1,0 +1,27 @@
+/**
+ * 4-way 16-bit multiplexor:
+ * out = a if sel = 00
+ *       b if sel = 01
+ *       c if sel = 10
+ *       d if sel = 11
+ * 注意sel的顺序是从右往左
+ */
+CHIP Mux4Way16{
+    IN a[16],b[16],c[16],d[16],sel[2];
+    OUT out[16];
+    
+    PARTS:
+    Not(in=sel[0],out=notsel0);
+    Not(in=sel[1],out=notsel1);
+    And(a=notsel0,b=notsel1,out=sel00);
+    And(a=sel[0],b=notsel1,out=sel01);
+    And(a=sel[0],b=sel[1],out=sel11);
+    And(a=notsel0,b=sel[1],out=sel10);
+    Mux16(a=false,b=a,sel=sel00,out=p1);
+    Mux16(a=false,b=b,sel=sel01,out=p2);
+    Mux16(a=false,b=c,sel=sel10,out=p3);
+    Mux16(a=false,b=d,sel=sel11,out=p4);
+    Or16(a=p1,b=p2,out=p1p2);
+    Or16(a=p3,b=p4,out=p3p4);
+    Or16(a=p1p2,b=p3p4,out=out);
+}

@@ -1,0 +1,13 @@
+/**
+*或门，使用与非门和非门实现
+*out=a或b
+**/
+CHIP Or {
+    IN a, b;
+    OUT out;
+
+    PARTS:
+    Not(in=a,out=nota);
+    Not(in=b,out=notb);
+    Nand(a=nota,b=notb,out=out);
+}
