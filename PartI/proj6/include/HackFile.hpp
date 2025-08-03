@@ -5,34 +5,9 @@
 #include <string>
 #include <fstream>
 #include <unordered_map>
+#include "CommonFile.hpp"
 #include "Instruction.hpp"
-namespace {
-	void OrganizeLine(std::string& line){
-		//整理一行，只留下代码本身，每一段代码后有一个空格
-		auto it=line.begin();
-		while(it!=line.end()){
-			if(*it=='/'){
-				//出现斜杠，则后面都是注释
-				it=line.erase(it,line.end());
-				break;
-			}
-			if(std::isblank(*it)){
-				if(it==line.begin()||it+1==line.end()){
-					it=line.erase(it);//删除行首行尾空白
-				}else if(std::isblank(*(it+1))||*(it+1)=='/'){
-					it=line.erase(it);//删除连续空白或注释前空白
-				}else{
-					it++;//保留代码之间的一格空格
-				}
-			}else{
-				it++;
-			}
-		}
-		if(line.empty()==false){
-			line.push_back(' ');//若至少有一段代码，添加行尾空格
-		}
-	}
-}
+
 namespace{
 	std::unordered_map<std::string, int> predefine_table = {
 		{"R0", 0},   {"R1", 1},   {"R2", 2},   {"R3", 3},
@@ -43,24 +18,11 @@ namespace{
 		{"ARG", 2},{"THIS", 3},{"THAT", 4}
 	};
 }
-class HackFile{
+class HackFile:public CommonFile{
 //Hack语言文件
 public:
-	HackFile(std::fstream& fs){
-		//读取文件并提取代码
-		std::string line;
-		while(std::getline(fs,line)){
-			OrganizeLine(line);
-			if(line.empty()){continue;}//跳过空行
-			auto blank_pos=line.find_first_of(' ');
-			for(size_t i=0;i!=line.npos;i=blank_pos){
-				file_.push_back(line.substr(i,blank_pos-i));
-				blank_pos=line.find(' ',blank_pos+1);
-			}//添加代码
-		}
-	}
+	HackFile(std::fstream& fs):CommonFile(fs){}
 	~HackFile()=default;
-	friend std::fstream& operator<<(std::fstream& fs,HackFile& file);//对文件进行编译并输出
 private:
 	void FirstPass(){
 		//第一轮处理：解决标签
@@ -108,7 +70,9 @@ private:
 			}
 		}
 	}
-	void Compile(){
+	void Compile()override{
+		FirstPass();
+		SecondPass();
 		//真正进行编译
 		for(auto& item:file_){
 			if(item.find('@')!=item.npos){
@@ -120,15 +84,5 @@ private:
 	}
 private:
 	std::unordered_map<std::string,int> table_;//符号表
-	std::list<std::string> file_;//文件对象，按指令分隔
 };
-inline std::fstream& operator<<(std::fstream& fs,HackFile& file){
-		file.FirstPass();
-		file.SecondPass();
-		file.Compile();
-		for(const auto& item:file.file_){
-			fs<<item<<std::endl;
-		}
-		return fs;
-	}
 #endif
