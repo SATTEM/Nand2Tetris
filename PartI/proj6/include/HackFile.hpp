@@ -21,9 +21,23 @@ namespace{
 class HackFile:public CommonFile{
 //Hack语言文件
 public:
-	HackFile(std::fstream& fs):CommonFile(fs){}
-	~HackFile()=default;
+	HackFile(std::fstream& fs):CommonFile(fs){
+		SplitCode();
+	}
+	virtual ~HackFile()=default;
 private:
+	void SplitCode(){
+		//分割同一行内的代码
+		std::list<std::string> tmp;
+		for(auto& line:file_){
+			auto blank_pos=line.find_first_of(' ');
+			for(size_t i=0;i!=line.npos;i=blank_pos){
+				tmp.push_back(line.substr(i,blank_pos-i));
+				blank_pos=line.find(' ',blank_pos+1);
+			}
+		}
+		file_=tmp;
+	}
 	void FirstPass(){
 		//第一轮处理：解决标签
 		table_.merge(predefine_table);//载入预定义符号
@@ -59,8 +73,8 @@ private:
 		//第二轮处理：解决变量
 		int var_index=16;//变量的位置从RAM[16]开始
 		for(auto iter=file_.begin();iter!=file_.end();iter++){
-			if((*iter)[0]=='@'&&std::isalpha((*iter)[1])){
-				//找到地址以字母开头的A指令
+			if((*iter)[0]=='@'&&std::isdigit((*iter)[1])==false){
+				//找到地址以非数字开头(变量不允许以数字开头)的A指令
 				std::string var=iter->substr(1);
 				if(table_.find(var)==table_.end()){
 					//首次遇见此变量

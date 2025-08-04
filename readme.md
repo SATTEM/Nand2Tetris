@@ -9,3 +9,4 @@
 4. [Hack汇编语言](/PartI/week4)
 5. [实现计算机](/PartI/proj5)
 6. [实现汇编器](/PartI/proj6/)
+7. [实现VM码编译汇编码](/PartII/VMCompiler/)

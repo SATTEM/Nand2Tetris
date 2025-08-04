@@ -44,17 +44,14 @@ public:
 		}
 	}
 	virtual ~CommonFile()=default;
-	virtual void Compile()=0;//具体的编译行为
+	virtual std::string Compile()=0;//具体的编译行为
 	friend std::fstream& operator<<(std::fstream& fs,CommonFile& file);//对文件进行编译并输出
 protected:
 	std::list<std::string> file_;
 };
 
 inline std::fstream& operator<<(std::fstream& fs,CommonFile& file){
-		file.Compile();
-		for(const auto& item:file.file_){
-			fs<<item<<std::endl;
-		}
+		fs<<file.Compile();
 		return fs;
 	}
 #endif
