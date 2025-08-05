@@ -11,11 +11,15 @@
   ```
   
 - 各编译器的使用方法如下
+    ```sh
+    XXXCompiler input.yyy #输出input.zzz
+    #XXX为输入语言，如VMCompiler
+    #yyy为输入语言对应的后缀(jack/vm/asm)
+    #zzz为输出语言对应的后缀(vm/asm/hack)
+    ```
+  对于支持多文件编译的编译器:
   ```sh
-  XXXCompiler input.yyy #输出input.zzz
-  #XXX为输入语言，如VMCompiler
-  #yyy为输入语言对应的后缀(jack/vm/asm)
-  #zzz为输出语言对应的后缀(vm/asm/hack)
+  XXXCompiler dir #输出out.zzz
   ```
 ## 导航
 1. [基本逻辑元件](/PartI/proj1/)

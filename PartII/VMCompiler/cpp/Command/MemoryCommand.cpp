@@ -9,7 +9,7 @@ std::unordered_map<std::string,std::string> seg_map={
 
 std::string VM::PushCommand::Compile()const{
 	std::string hack_code;
-	std::string put_M_in_SP="D=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";
+	std::string put_M_in_SP="D=M\n@SP\nM=M+1\nA=M-1\nM=D\n";
 	std::string seg=seg_map[pieces_[1]];
 	if(seg=="LCL"||seg=="ARG"||seg=="THIS"||seg=="THAT"){
 		std::string access_point_addr="@"+pieces_[2]+"\nD=A\n@"+seg+"\nA=D+M\n";//访问指向的地址
@@ -17,7 +17,7 @@ std::string VM::PushCommand::Compile()const{
 		hack_code+=put_M_in_SP;
 	}else if(seg=="constant"){
 		hack_code+="@"+pieces_[2]+"\n";
-		hack_code+="D=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";
+		hack_code+="D=A\n@SP\nM=M+1\nA=M-1\nM=D\n";
 	}else if(seg=="static"){
 		//注意：这里和课程标准不同，手动添加了一个F以避免文件名以数字开头的情况
 		hack_code+="@F"+current_file_name_+"."+pieces_[2]+"\n";

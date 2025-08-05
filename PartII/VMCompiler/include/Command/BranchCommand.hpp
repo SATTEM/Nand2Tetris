@@ -7,7 +7,7 @@ namespace VM {
 	class BranchCommand:public VMCommand{
 	public:
 		BranchCommand(std::list<std::string>::iterator& iter):VMCommand(iter){
-			label_=current_file_name_+"."+*iter;//需要一个参数，即标签名
+			label_=current_function_name_+"$"+*iter;//需要一个参数，即标签名
 			iter++;
 		}
 		virtual ~BranchCommand()=default;
