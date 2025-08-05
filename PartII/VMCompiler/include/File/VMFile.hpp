@@ -11,11 +11,11 @@ namespace VM{
 	public:
 		virtual ~VMFile()=default;
 		VMFile(std::fstream& fs);
-		std::string Compile()override;
-		void RegisterCommand(const std::string& cmd,std::unique_ptr<CommandFactory> f){factories_[cmd]=std::move(f);}
+		std::string Compile(const bool is_main=false)override;
+		static void RegisterCommand(const std::string& cmd,std::unique_ptr<CommandFactory> f){factories_[cmd]=std::move(f);}
 	private:
 		std::list<std::string>::iterator iter_;
-		std::unordered_map<std::string, std::unique_ptr<CommandFactory>> factories_;
+		static std::unordered_map<std::string, std::unique_ptr<CommandFactory>> factories_;
 	};
 }
 #endif

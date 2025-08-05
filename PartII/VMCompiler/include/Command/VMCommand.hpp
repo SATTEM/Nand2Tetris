@@ -19,7 +19,7 @@ namespace VM{
 		}
 	protected:
 		std::vector<std::string> pieces_;
-		static std::string current_file_name_;
+		static std::string current_file_name_,current_function_name_;
 	};
 }
 
