@@ -20,8 +20,8 @@ std::string VM::PushCommand::Compile()const{
 		hack_code+="@"+pieces_[2]+"\n";
 		hack_code+="D=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";
 	}else if(seg=="static"){
-		//注意：这里和课程标准不同，手动添加了一个F以避免文件名以数字开头的情况
-		hack_code+="@F"+current_file_name_+"."+pieces_[2]+"\n";
+		//注意：这里和课程标准不同，文件名添加了一个F以避免文件名以数字开头的情况
+		hack_code+="@"+current_file_name_+"."+pieces_[2]+"\n";
 		hack_code+=put_M_in_SP;
 	}else if(seg=="tmp"){
 		int temp_address=5+std::stoi(pieces_[2]);
@@ -58,8 +58,8 @@ std::string VM::PopCommand::Compile()const{
 		hack_code+="@"+seg+"\nM=D\n";//将D存入目标
 	}else if(seg=="static"){
 		hack_code+=pop_to_D;
-		//注意：这里和课程标准不同，手动添加了一个F以避免文件名以数字开头的情况
-		hack_code+="@F"+current_file_name_+"."+pieces_[2]+"\nM=D\n";
+		//注意：这里和课程标准不同，文件名添加了一个F以避免文件名以数字开头的情况
+		hack_code+="@"+current_file_name_+"."+pieces_[2]+"\nM=D\n";
 	}else if(seg=="pointer"){
 		std::string target;
 		if(pieces_[2]=="0"){

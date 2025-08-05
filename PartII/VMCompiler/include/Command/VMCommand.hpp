@@ -5,7 +5,6 @@
 #include <vector>
 #include <list>
 namespace VM{
-	enum class CommandType{Push,Pop,Add,Sub,And,Or,Not,Neg,Eq,Gt,Lt};
 	class VMCommand{
 	//VM代码
 	public:
@@ -15,8 +14,12 @@ namespace VM{
 		}
 		virtual ~VMCommand()=default;
 		virtual std::string Compile()const=0;//编译方法
+		static void SetCurrentFileName(const std::string& name){
+			current_file_name_="F"+name;//这里给文件名加了一个F
+		}
 	protected:
 		std::vector<std::string> pieces_;
+		static std::string current_file_name_;
 	};
 }
 

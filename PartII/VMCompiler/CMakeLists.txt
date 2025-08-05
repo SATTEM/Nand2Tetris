@@ -12,5 +12,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LIBPATH})
 #设置可执行文件路径
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #编译源文件
+add_subdirectory(${CPP}/File)
 add_subdirectory(${CPP}/Command)
 add_subdirectory(${CPP})

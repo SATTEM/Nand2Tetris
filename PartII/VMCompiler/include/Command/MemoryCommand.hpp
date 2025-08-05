@@ -12,9 +12,6 @@ namespace VM {
 			iter++;
 		}
 		virtual ~MemoryCommand()=default;
-		static void SetCurrentFileName(const std::string& name){current_file_name_=name;}
-	protected:
-		static std::string current_file_name_;
 	};
 	class PushCommand:public MemoryCommand{
 	public:

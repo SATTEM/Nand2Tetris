@@ -11,7 +11,7 @@ namespace VM {
 		}
 		virtual ~PlainCommand()=default;
 	};
-	//各种命令的声明
+	//各种一般命令的声明
 	class NotCommand:public PlainCommand{
 	public:
 		NotCommand(std::list<std::string>::iterator& iter):PlainCommand(iter){}
