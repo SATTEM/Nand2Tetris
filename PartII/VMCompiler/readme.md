@@ -105,9 +105,9 @@
 	(XXX_END)
 	```
 ## 分支<a id="branch"></a>
-- ```label LABEL``:声明标签
-- ```goto LABEL``:跳跃到指定标签
-- ```if-goto LABEL`:弹出栈顶元素，若其为真则跳跃到指定标签
+- ```label LABEL```:声明标签
+- ```goto LABEL```:跳跃到指定标签
+- ```if-goto LABEL```:弹出栈顶元素，若其为真则跳跃到指定标签
 ## 函数<a id="function"></a>
 - ```function name n```:声明一个名为name,需要n个局部变量的函数
 	行为:声明一个函数全名标签，并在全局栈中准备n个变量作为local段

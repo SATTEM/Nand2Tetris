@@ -1,0 +1,6 @@
+**/build/
+PartI/week4/*.md
+**/.cache/
+**/lib/
+**/bin/
+.vscode/
